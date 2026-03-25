@@ -5,9 +5,16 @@ We built this project as a three-person team to deliver an educational MVP for D
 <!-- DEPLOYMENT_INFO:START -->
 ## Deployment Info
 
-- Network: Sepolia
+- Network: sepolia
 - Contract: `DCAPlanManager`
-- Status: not deployed from this repository yet
+- Address: `0x3BBfFa934e619E7fAcE878dAEe8da5664eEC45f5`
+- Explorer: [address](https://sepolia.etherscan.io/address/0x3BBfFa934e619E7fAcE878dAEe8da5664eEC45f5)
+- Code: [verified/source](https://sepolia.etherscan.io/address/0x3BBfFa934e619E7fAcE878dAEe8da5664eEC45f5#code)
+- Deploy tx: `0x4d30b90e5297eb4002822454571f85ef8a02f8261d365af8cc477797bd028662`
+- Deployer: `0x1ac4c1e133c71FC72cf8Da0427d3eA06549e3Aa1`
+- Deployed at: 2026-03-25T20:34:24.815Z
+- Verified: no
+- Verified at: not verified yet
 <!-- DEPLOYMENT_INFO:END -->
 
 ## What Our Team Implemented
