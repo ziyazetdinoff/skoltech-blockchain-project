@@ -1,7 +1,8 @@
-import { Telegraf } from "telegraf";
+import { Markup, Telegraf } from "telegraf";
 import { BotConfig } from "../../src/common/env";
 import { DcaBotService } from "../services/DcaBotService";
 import { BotSession, BotSessionStore } from "../services/BotSessionStore";
+import { PlanStatus } from "../../src/common/types";
 
 function getArgs(text: string): string[] {
   return text.trim().split(/\s+/).slice(1);
@@ -132,6 +133,48 @@ function helpText(service: DcaBotService): string {
   ].join("\n");
 }
 
+function planActionKeyboard(planId: number, status: PlanStatus) {
+  const buttons = [];
+
+  if (status === "Active") {
+    buttons.push(
+      Markup.button.callback("Pause", `plan:pause:${planId}`),
+      Markup.button.callback("Cancel", `plan:cancel:${planId}`),
+    );
+  } else if (status === "Paused") {
+    buttons.push(
+      Markup.button.callback("Resume", `plan:resume:${planId}`),
+      Markup.button.callback("Cancel", `plan:cancel:${planId}`),
+    );
+  }
+
+  buttons.push(Markup.button.callback("Refresh", `plan:refresh:${planId}`));
+
+  return Markup.inlineKeyboard(buttons, { columns: status === "Canceled" || status === "Completed" ? 1 : 2 });
+}
+
+async function renderPlanCard(ctx: any, service: DcaBotService, planId: number): Promise<void> {
+  const card = await service.getPlanCard(planId);
+  await ctx.reply(card.text, planActionKeyboard(planId, card.status));
+}
+
+async function editPlanCard(ctx: any, service: DcaBotService, planId: number): Promise<void> {
+  const card = await service.getPlanCard(planId);
+  try {
+    await ctx.editMessageText(card.text, {
+      reply_markup: planActionKeyboard(planId, card.status).reply_markup,
+    });
+  } catch (error) {
+    const message = service.formatError(error);
+    if (message.toLowerCase().includes("message is not modified")) {
+      await ctx.answerCbQuery("Plan is already up to date.");
+      return;
+    }
+
+    throw error;
+  }
+}
+
 export function registerCommands(
   bot: Telegraf,
   service: DcaBotService,
@@ -171,7 +214,7 @@ export function registerCommands(
     }
 
     try {
-      await ctx.reply(await service.getPlanDetails(Number(args[0])));
+      await renderPlanCard(ctx, service, Number(args[0]));
     } catch (error) {
       await ctx.reply(service.formatError(error));
     }
@@ -270,6 +313,32 @@ export function registerCommands(
       draft: {},
     });
     await ctx.reply("Введите новый `amountPerInterval` в USDC.");
+  });
+
+  bot.action(/^plan:(refresh|pause|resume|cancel):(\d+)$/, async (ctx) => {
+    const [, action, rawPlanId] = ctx.match;
+    const planId = Number(rawPlanId);
+
+    try {
+      if (action === "pause") {
+        const message = await service.pausePlan(planId);
+        await ctx.answerCbQuery(message.split("\n")[0]);
+      } else if (action === "resume") {
+        const message = await service.resumePlan(planId);
+        await ctx.answerCbQuery(message.split("\n")[0]);
+      } else if (action === "cancel") {
+        const message = await service.cancelPlan(planId);
+        await ctx.answerCbQuery(message.split("\n")[0]);
+      } else {
+        await ctx.answerCbQuery("Plan refreshed.");
+      }
+
+      await editPlanCard(ctx, service, planId);
+    } catch (error) {
+      await ctx.answerCbQuery(service.formatError(error).slice(0, 180), {
+        show_alert: true,
+      });
+    }
   });
 
   bot.on("text", async (ctx, next) => {

@@ -7,6 +7,7 @@ dotenv.config();
 const {
   RPC_URL,
   DEPLOYER_PRIVATE_KEY,
+  ETHERSCAN_API_KEY,
 } = process.env;
 
 const accounts = DEPLOYER_PRIVATE_KEY ? [DEPLOYER_PRIVATE_KEY] : [];
@@ -26,6 +27,11 @@ const config: HardhatUserConfig = {
     sepolia: {
       url: RPC_URL ?? "",
       accounts,
+    },
+  },
+  etherscan: {
+    apiKey: {
+      sepolia: ETHERSCAN_API_KEY ?? "",
     },
   },
 };

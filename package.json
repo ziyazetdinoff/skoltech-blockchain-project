@@ -11,10 +11,12 @@
     "clean": "hardhat clean",
     "compile": "hardhat compile",
     "test": "hardhat test",
-    "bot": "tsx bot/index.ts",
-    "executor": "tsx executor/index.ts",
+    "bot": "node --import tsx bot/index.ts",
+    "executor": "node --import tsx executor/index.ts",
     "deploy:sepolia": "hardhat run scripts/deploy.ts --network sepolia",
-    "seed:sepolia": "tsx scripts/seed.ts"
+    "verify:sepolia": "hardhat run scripts/verify.ts --network sepolia",
+    "docs:update": "node --import tsx scripts/update-deployment-docs.ts",
+    "seed:sepolia": "node --import tsx scripts/seed.ts"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.1.0",

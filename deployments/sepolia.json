@@ -1,0 +1,19 @@
+{
+  "network": "sepolia",
+  "chainId": 11155111,
+  "contract": "DCAPlanManager",
+  "address": null,
+  "deployer": null,
+  "deploymentTxHash": null,
+  "uniswapRouter": null,
+  "uniswapQuoter": null,
+  "usdcAddress": null,
+  "wethAddress": null,
+  "poolFee": null,
+  "maxSlippageBps": null,
+  "deployedAt": null,
+  "verified": false,
+  "verifiedAt": null,
+  "explorerAddressUrl": null,
+  "explorerCodeUrl": null
+}

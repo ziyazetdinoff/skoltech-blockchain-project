@@ -1,0 +1,18 @@
+0 verbose cli /usr/local/bin/node /usr/local/bin/npm
+1 info using npm@10.9.7
+2 info using node@v22.22.2
+3 silly config load:file:/usr/local/lib/node_modules/npm/npmrc
+4 silly config load:file:/app/.npmrc
+5 silly config load:file:/app/.home/.npmrc
+6 silly config load:file:/usr/local/etc/npmrc
+7 verbose title npm test
+8 verbose argv "test"
+9 verbose logfile logs-max:10 dir:/app/.home/.npm/_logs/2026-03-25T19_09_31_955Z-
+10 verbose logfile /app/.home/.npm/_logs/2026-03-25T19_09_31_955Z-debug-0.log
+11 silly logfile done cleaning log files
+12 verbose cwd /app
+13 verbose os Linux 6.12.5-linuxkit
+14 verbose node v22.22.2
+15 verbose npm  v10.9.7
+16 verbose exit 0
+17 info ok

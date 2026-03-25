@@ -5,7 +5,7 @@ import { describeError } from "../../src/common/errors";
 import { createWallet, ensureAllowance, getDcaManagerContract } from "../../src/common/ethereum";
 import { formatPlanDetails, formatPlanSummary, getPlanStatus, normalizePlan } from "../../src/common/plan";
 import { TokenMetadataCache } from "../../src/common/tokenMetadata";
-import { DcaPlan } from "../../src/common/types";
+import { DcaPlan, PlanStatus } from "../../src/common/types";
 import { StateRepository } from "../../src/storage/sqlite";
 
 export interface CreatePlanInput {
@@ -21,6 +21,11 @@ export interface UpdatePlanInput {
   amountPerInterval: string;
   intervalSeconds: number;
   slippageBps: number;
+}
+
+export interface PlanCardView {
+  text: string;
+  status: PlanStatus;
 }
 
 export class DcaBotService {
@@ -67,7 +72,7 @@ export class DcaBotService {
     return plans.join("\n\n");
   }
 
-  async getPlanDetails(planId: number): Promise<string> {
+  async getPlanCard(planId: number): Promise<PlanCardView> {
     const pair = getDemoPairConfig(this.config);
     const [plan, tokenIn, tokenOut] = await Promise.all([
       this.fetchOwnedPlan(planId),
@@ -75,7 +80,17 @@ export class DcaBotService {
       this.metadataCache.get(pair.tokenOut.address),
     ]);
 
-    return formatPlanDetails(planId, plan, tokenIn, tokenOut);
+    const status = getPlanStatus(plan);
+    const text = [
+      formatPlanDetails(planId, plan, tokenIn, tokenOut),
+      "",
+      "Actions: use the inline buttons below or slash commands.",
+    ].join("\n");
+
+    return {
+      text,
+      status,
+    };
   }
 
   async createPlan(input: CreatePlanInput): Promise<string> {
