@@ -2,6 +2,11 @@
 
 Учебный MVP для стратегии Dollar-Cost Averaging на Ethereum Sepolia. Проект состоит из смарт-контракта `DCAPlanManager`, off-chain executor-сервиса и Telegram-бота для одного демонстрационного пользователя.
 
+Дополнительные документы:
+
+- [README_ENG.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/README_ENG.md)
+- [ENV_SETUP.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/ENV_SETUP.md)
+
 ## Что реализовано
 
 - смарт-контракт `DCAPlanManager` на Solidity
