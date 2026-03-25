@@ -7,6 +7,14 @@
 - [README_ENG.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/README_ENG.md)
 - [ENV_SETUP.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/ENV_SETUP.md)
 
+<!-- DEPLOYMENT_INFO:START -->
+## Deployment Info
+
+- Сеть: Sepolia
+- Контракт: `DCAPlanManager`
+- Статус: контракт еще не задеплоен из этого репозитория
+<!-- DEPLOYMENT_INFO:END -->
+
 ## Что реализовано
 
 - смарт-контракт `DCAPlanManager` на Solidity
@@ -51,6 +59,10 @@ src/
   storage/
 
 deployments/
+  sepolia.json
+Dockerfile
+docker-compose.yml
+Makefile
 README.md
 report.md
 ```
@@ -86,6 +98,10 @@ cp .env.example .env
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_ALLOWED_USER_ID`
 
+Для verify дополнительно потребуется:
+
+- `ETHERSCAN_API_KEY`
+
 Подробная пошаговая инструкция, откуда брать ключевые значения (`RPC_URL`, private key, Uniswap addresses, USDC/WETH addresses), вынесена в отдельный документ:
 
 - [ENV_SETUP.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/ENV_SETUP.md)
@@ -108,6 +124,39 @@ cp .env.example .env
 
 ```bash
 npm install
+```
+
+## Docker и Makefile
+
+Теперь рекомендуемый способ запуска проекта:
+
+```bash
+make build-image
+make compile
+make test
+```
+
+Основные цели:
+
+- `make build-image`
+- `make compile`
+- `make test`
+- `make deploy`
+- `make verify`
+- `make seed SEED_ARGS="10 100 604800 300 me now"`
+- `make up`
+- `make down`
+- `make logs`
+
+Эквивалентные прямые команды через Docker Compose:
+
+```bash
+docker compose build
+docker compose run --rm hardhat npm run compile
+docker compose run --rm hardhat npm test
+docker compose run --rm hardhat npm run deploy:sepolia
+docker compose run --rm hardhat npm run verify:sepolia
+docker compose up -d bot executor
 ```
 
 ## Сборка и тесты
@@ -139,7 +188,38 @@ npm run deploy:sepolia
    - задеплоит `DCAPlanManager`
    - сохранит метаданные в `deployments/sepolia.json`
    - выведет адрес контракта в терминал
+   - автоматически обновит deployment block в `README.md` и `README_ENG.md`
 4. Скопируйте адрес в `.env` как `DCA_MANAGER_ADDRESS` или `CONTRACT_ADDRESS`.
+
+Рекомендуемая команда:
+
+```bash
+make deploy
+```
+
+## Verify в Etherscan
+
+Verify вынесен в отдельный шаг и использует:
+
+- `ETHERSCAN_API_KEY` из `.env`
+- адрес и constructor args из `deployments/sepolia.json`
+
+Команда:
+
+```bash
+make verify
+```
+
+Или напрямую:
+
+```bash
+docker compose run --rm hardhat npm run verify:sepolia
+```
+
+После успешного verify:
+
+- `deployments/sepolia.json` обновляется флагами `verified` и `verifiedAt`
+- deployment block в `README.md` и `README_ENG.md` обновляется повторно
 
 ## Создание демо-плана
 
@@ -185,7 +265,7 @@ Executor:
 Для разового прогона:
 
 ```bash
-npx tsx executor/index.ts --once
+node --import tsx executor/index.ts --once
 ```
 
 ## Запуск Telegram-бота
@@ -207,6 +287,15 @@ npm run bot
 - `/withdraw <id> <amount>`
 - `/create`
 - `/update <id>`
+
+Для `/plan <id>` бот теперь показывает inline buttons:
+
+- `Pause`
+- `Resume`
+- `Cancel`
+- `Refresh`
+
+Slash-команды продолжают работать как раньше.
 
 `/create` проводит пользователя через шаги:
 

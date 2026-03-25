@@ -2,6 +2,14 @@
 
 We built this project as a three-person team to deliver an educational MVP for Dollar-Cost Averaging on Ethereum Sepolia. Our goal was to combine an on-chain DCA manager, an off-chain automation service, and a simple Telegram interface into one end-to-end demo system.
 
+<!-- DEPLOYMENT_INFO:START -->
+## Deployment Info
+
+- Network: Sepolia
+- Contract: `DCAPlanManager`
+- Status: not deployed from this repository yet
+<!-- DEPLOYMENT_INFO:END -->
+
 ## What Our Team Implemented
 
 - a Solidity smart contract: `DCAPlanManager`
@@ -46,6 +54,10 @@ src/
   storage/
 
 deployments/
+  sepolia.json
+Dockerfile
+docker-compose.yml
+Makefile
 README.md
 README_ENG.md
 ENV_SETUP.md
@@ -113,6 +125,10 @@ Required values:
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_ALLOWED_USER_ID`
 
+For verification, we also need:
+
+- `ETHERSCAN_API_KEY`
+
 After deployment, also set:
 
 - `DCA_MANAGER_ADDRESS`
@@ -138,6 +154,39 @@ For a beginner-friendly explanation of where these values come from, see:
 
 ```bash
 npm install
+```
+
+## Docker and Makefile
+
+We now treat Docker as the primary way to run the project:
+
+```bash
+make build-image
+make compile
+make test
+```
+
+Main targets:
+
+- `make build-image`
+- `make compile`
+- `make test`
+- `make deploy`
+- `make verify`
+- `make seed SEED_ARGS="10 100 604800 300 me now"`
+- `make up`
+- `make down`
+- `make logs`
+
+Equivalent Docker Compose commands:
+
+```bash
+docker compose build
+docker compose run --rm hardhat npm run compile
+docker compose run --rm hardhat npm test
+docker compose run --rm hardhat npm run deploy:sepolia
+docker compose run --rm hardhat npm run verify:sepolia
+docker compose up -d bot executor
 ```
 
 ## Build and Test
@@ -173,6 +222,41 @@ npm run deploy:sepolia
 The script also stores deployment metadata in:
 
 - `deployments/sepolia.json`
+
+It also auto-updates the deployment info block in:
+
+- `README.md`
+- `README_ENG.md`
+
+Recommended command:
+
+```bash
+make deploy
+```
+
+## Verify on Etherscan
+
+Verification is intentionally separated from deployment. The verify step uses:
+
+- `ETHERSCAN_API_KEY` from `.env`
+- the deployed address and constructor arguments from `deployments/sepolia.json`
+
+Run:
+
+```bash
+make verify
+```
+
+Or directly:
+
+```bash
+docker compose run --rm hardhat npm run verify:sepolia
+```
+
+After successful verification:
+
+- `deployments/sepolia.json` is updated with `verified` and `verifiedAt`
+- both README deployment info blocks are refreshed
 
 ## Create a Demo Plan
 
@@ -218,7 +302,7 @@ The executor:
 For a single one-off run:
 
 ```bash
-npx tsx executor/index.ts --once
+node --import tsx executor/index.ts --once
 ```
 
 ## Run the Telegram Bot
@@ -240,6 +324,15 @@ Supported commands:
 - `/withdraw <id> <amount>`
 - `/create`
 - `/update <id>`
+
+For `/plan <id>`, the bot now shows inline buttons:
+
+- `Pause`
+- `Resume`
+- `Cancel`
+- `Refresh`
+
+The original slash commands remain fully supported.
 
 Interactive `/create` flow:
 

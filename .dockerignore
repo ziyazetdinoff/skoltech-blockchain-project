@@ -1,0 +1,10 @@
+node_modules
+dist
+cache
+artifacts
+coverage
+.git
+.env
+data
+deployments/*.json
+.home

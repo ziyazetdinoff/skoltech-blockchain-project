@@ -146,6 +146,28 @@ USDC_ADDRESS=0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238
 WETH_ADDRESS=0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14
 ```
 
+## 8. `ETHERSCAN_API_KEY`
+
+Эта переменная нужна для отдельного шага verify после деплоя контракта.
+
+### Как получить
+
+1. Зарегистрируйтесь на [Etherscan](https://etherscan.io/register).
+2. Создайте API key по официальной инструкции:
+   - [Getting an API Key](https://docs.etherscan.io/getting-an-api-key)
+3. Скопируйте ключ в `.env`.
+
+### Пример
+
+```env
+ETHERSCAN_API_KEY=YOUR_ETHERSCAN_API_KEY
+```
+
+### Для чего используется в проекте
+
+- `make verify`
+- `npm run verify:sepolia`
+
 ## Готовый минимальный `.env`
 
 Ниже минимальный набор значений, которые нужно заполнить перед деплоем и запуском:
@@ -161,6 +183,8 @@ UNISWAP_QUOTER=0x7A0be50E2AEE679618CD61045F19E1A414De94E5
 
 USDC_ADDRESS=0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238
 WETH_ADDRESS=0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14
+
+ETHERSCAN_API_KEY=YOUR_ETHERSCAN_API_KEY
 ```
 
 После деплоя контракта понадобится дописать еще:
@@ -223,7 +247,7 @@ UNISWAP_POOL_FEE=500
 
 Что делать:
 
-- взять адрес из вывода `npm run deploy:sepolia`
+- взять адрес из вывода `make deploy` или `npm run deploy:sepolia`
 - записать его в `DCA_MANAGER_ADDRESS` или `CONTRACT_ADDRESS`
 
 ## Практический порядок действий
@@ -237,11 +261,17 @@ UNISWAP_POOL_FEE=500
 7. Выполнить деплой:
 
 ```bash
-npm run deploy:sepolia
+make deploy
 ```
 
 8. Скопировать адрес контракта в `.env`.
-9. Запустить executor и bot.
+9. Выполнить verify:
+
+```bash
+make verify
+```
+
+10. Запустить executor и bot.
 
 ## Источники
 
@@ -253,3 +283,4 @@ npm run deploy:sepolia
 - [Sepolia Etherscan: WETH9](https://sepolia.etherscan.io/address/0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14)
 - [Circle docs: monitored tokens](https://developers.circle.com/wallets/monitored-tokens)
 - [Circle faucet](https://faucet.circle.com/)
+- [Etherscan: Getting an API Key](https://docs.etherscan.io/getting-an-api-key)
