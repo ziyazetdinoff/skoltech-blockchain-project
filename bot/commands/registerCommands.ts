@@ -53,26 +53,26 @@ async function handleSessionInput(
       case "amountPerInterval":
         session.draft.amountPerInterval = input;
         sessions.set(userId, { ...session, step: "totalBudget" });
-        return "Введите `totalBudget` в USDC.";
+        return "Enter `totalBudget` in PYUSD.";
       case "totalBudget":
         session.draft.totalBudget = input;
         sessions.set(userId, { ...session, step: "intervalSeconds" });
-        return "Введите `intervalSeconds` целым числом.";
+        return "Enter `intervalSeconds` as an integer.";
       case "intervalSeconds":
         session.draft.intervalSeconds = parsePositiveInteger(input, "Interval");
         sessions.set(userId, { ...session, step: "slippageBps" });
-        return "Введите `slippageBps` целым числом.";
+        return "Enter `slippageBps` as an integer (e.g., 100 for 1%).";
       case "slippageBps":
         session.draft.slippageBps = parsePositiveInteger(input, "Slippage");
         sessions.set(userId, { ...session, step: "recipient" });
-        return "Введите адрес recipient или `me`.";
+        return "Enter recipient address or `me`.";
       case "recipient":
         if (!isValidAddress(input)) {
           throw new Error("Recipient must be a valid address or `me`.");
         }
         session.draft.recipient = input;
         sessions.set(userId, { ...session, step: "startTime" });
-        return "Введите время старта: `now`, unix timestamp или ISO datetime.";
+        return "Enter start time: `now`, unix timestamp, or ISO datetime.";
       case "startTime": {
         session.draft.startTime = parseStartTime(input);
         sessions.clear(userId);
@@ -94,11 +94,11 @@ async function handleSessionInput(
     case "amountPerInterval":
       session.draft.amountPerInterval = input;
       sessions.set(userId, { ...session, step: "intervalSeconds" });
-      return "Введите новый `intervalSeconds`.";
+      return "Enter new `intervalSeconds`.";
     case "intervalSeconds":
       session.draft.intervalSeconds = parsePositiveInteger(input, "Interval");
       sessions.set(userId, { ...session, step: "slippageBps" });
-      return "Введите новый `slippageBps`.";
+      return "Enter new `slippageBps`.";
     case "slippageBps":
       session.draft.slippageBps = parsePositiveInteger(input, "Slippage");
       sessions.clear(userId);
@@ -291,12 +291,14 @@ export function registerCommands(
   });
 
   bot.command("create", async (ctx) => {
+    console.log(`[bot:debug] User ${ctx.from.id} started /create`);
     sessions.set(ctx.from.id, {
       kind: "create",
       step: "amountPerInterval",
       draft: {},
     });
-    await ctx.reply("Введите `amountPerInterval` в USDC.");
+    console.log(`[bot:debug] Create session initiated for ${ctx.from.id}`);
+    await ctx.reply("Enter `amountPerInterval` in PYUSD.");
   });
 
   bot.command("update", async (ctx) => {
@@ -312,7 +314,7 @@ export function registerCommands(
       step: "amountPerInterval",
       draft: {},
     });
-    await ctx.reply("Введите новый `amountPerInterval` в USDC.");
+    await ctx.reply("Enter new `amountPerInterval` in PYUSD.");
   });
 
   bot.action(/^plan:(refresh|pause|resume|cancel):(\d+)$/, async (ctx) => {
@@ -355,7 +357,9 @@ export function registerCommands(
     }
 
     try {
+      console.log(`[bot:debug] User ${ctx.from.id} sent input: ${text} for step ${session.step}`);
       const response = await handleSessionInput(service, sessions, ctx.from.id, session, text);
+      console.log(`[bot:debug] Response generated: ${response}`);
       await ctx.reply(response);
     } catch (error) {
       sessions.clear(ctx.from.id);

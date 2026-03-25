@@ -66,7 +66,7 @@ export class DcaBotService {
     }
 
     if (plans.length === 0) {
-      return "Планов пока нет.";
+      return "No plans yet.";
     }
 
     return plans.join("\n\n");
@@ -95,6 +95,7 @@ export class DcaBotService {
 
   async createPlan(input: CreatePlanInput): Promise<string> {
     const pair = getDemoPairConfig(this.config);
+    console.log(`[bot:debug] Creating plan with amountPerInterval=${input.amountPerInterval}, totalBudget=${input.totalBudget}`);
     const tokenIn = await this.metadataCache.get(pair.tokenIn.address);
     const amountPerInterval = parseUnits(input.amountPerInterval, tokenIn.decimals);
     const totalBudget = parseUnits(input.totalBudget, tokenIn.decimals);
@@ -103,8 +104,10 @@ export class DcaBotService {
       throw new Error("Total budget must be greater than or equal to amount per interval.");
     }
 
+    console.log(`[bot:debug] Ensuring allowance for ${pair.tokenIn.address}...`);
     await ensureAllowance(pair.tokenIn.address, this.wallet, this.config.dcaManagerAddress, totalBudget);
 
+    console.log("[bot:debug] Allowance checked. Calling createPlan tx...");
     const currentPlanId = await this.manager.nextPlanId() as bigint;
     const transaction = await this.manager.createPlan(
       pair.tokenIn.address,
@@ -116,7 +119,9 @@ export class DcaBotService {
       this.resolveRecipient(input.recipient),
       input.startTime ?? BigInt(Math.floor(Date.now() / 1000)),
     );
+    console.log(`[bot:debug] Tx sent: ${transaction.hash}. Waiting for receipt...`);
     const receipt = await transaction.wait();
+    console.log(`[bot:debug] Receipt received. Plan #${currentPlanId.toString()} created.`);
 
     const createdPlanId = Number(currentPlanId);
     const plan = await this.fetchOwnedPlan(createdPlanId);
