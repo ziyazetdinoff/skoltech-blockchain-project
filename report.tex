@@ -1,0 +1,109 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage[T1]{fontenc}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage[hidelinks]{hyperref}
+
+\title{DCA MVP on Ethereum Sepolia: An Educational Automated Buying System with a Telegram Interface}
+
+\author{
+\IEEEauthorblockN{Lyubov Lazareva, Roman Farforov, Ruslan Ziyazetdinov}
+\IEEEauthorblockA{Student Project Team\\
+Project Repository: \url{https://github.com/ziyazetdinoff/skoltech-blockchain-project}}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This project delivers an educational minimum viable product for interval-based dollar-cost averaging (DCA) on Ethereum Sepolia. The system combines an on-chain smart contract that stores user budgets and plan parameters, an off-chain executor that monitors due plans and submits swap transactions, and a Telegram bot used as a lightweight user interface. The implementation targets a single-user demo flow for the USDC-to-WETH pair on Uniswap V3 and emphasizes clarity of architecture over production complexity. The project includes plan lifecycle management, slippage protection through quoted minimum output constraints, local execution logging in SQLite, automated tests, and a live Sepolia deployment.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Ethereum, DCA, smart contract, Uniswap V3, Telegram bot, automation, Hardhat
+\end{IEEEkeywords}
+
+\section{Introduction}
+Dollar-cost averaging is a widely used strategy in which an investor acquires an asset in fixed portions over time instead of entering the market with a single trade. The goal of this project was to implement a compact end-to-end MVP that demonstrates how such a strategy can be automated in a blockchain environment. The system was designed for educational use rather than for production asset management, so the main priorities were understandable contract logic, a reproducible deployment pipeline, and a simple user-facing interface.
+
+The resulting solution runs on Ethereum Sepolia and integrates Uniswap V3 for token swaps. A user pre-deposits the total budget for a plan into the smart contract, while an off-chain executor periodically checks whether the next interval has arrived. When a plan becomes due, the executor requests a quote, derives a protected minimum output value, and calls the contract to execute one swap. The user interacts with this flow through a Telegram bot instead of a web application, which keeps the MVP small and easy to demonstrate.
+
+\section{System Overview}
+The architecture contains three main modules. First, the \texttt{DCAPlanManager} smart contract stores plans, locked budgets, and execution rules. Second, the executor service scans all plans, computes execution parameters, writes plan snapshots and execution attempts to SQLite, and submits transactions from a configured backend wallet. Third, the Telegram bot exposes commands for creating, inspecting, pausing, resuming, canceling, topping up, withdrawing from, and updating plans.
+
+The project stack was intentionally pragmatic. Solidity was used for the contract, Hardhat with TypeScript for compilation, testing, deployment, and scripts, Node.js for the bot and executor, SQLite for local service state, and Telegraf for Telegram integration. This choice avoided unnecessary infrastructure while still demonstrating an end-to-end decentralized application workflow.
+
+The MVP follows a single-user demo model. At the user experience level, the interface is restricted to one preconfigured trading pair, USDC to WETH, on Sepolia. This limitation reduces configuration errors and keeps the demo focused on the DCA logic rather than on pair discovery or portfolio management.
+
+\section{Smart Contract Design}
+The core contract stores each plan as a structure containing the owner, recipient, input and output tokens, amount per interval, total and remaining budget, interval length, slippage bound, start time, next execution timestamp, and boolean lifecycle flags. Each new plan transfers the full budget from the owner into the contract, which makes later automated execution possible without additional approvals on every interval.
+
+The contract supports the required lifecycle operations: create, pause, resume, cancel, top up, withdraw unused funds, and update. Owner checks protect user-controlled operations, while OpenZeppelin utilities provide safe ERC-20 transfers, pausability, and reentrancy protection. A global pause controlled by the contract owner can disable execution when needed.
+
+Plan execution is implemented through Uniswap V3 \texttt{exactInputSingle}. When \texttt{executePlan} is called, the contract verifies that the plan is active, not paused or canceled, due by timestamp, and funded with at least one interval amount. It then approves the router for exactly one trade, performs the swap, resets the approval, reduces the remaining budget, schedules the next execution time as the current block timestamp plus the interval, and transfers the purchased output token to the recipient.
+
+Two design choices are especially important for the MVP. First, missed intervals are not replayed. If the executor was offline, the next successful run executes only one purchase and then schedules the next interval forward from the current block. Second, a failed swap fully reverts the transaction, so the plan remains unchanged and can be retried later. This behavior keeps state transitions simple and predictable.
+
+\section{Off-Chain Automation and Telegram Interface}
+The executor service treats the smart contract as the source of truth. On each scan cycle it reads \texttt{nextPlanId}, iterates over all existing plans, normalizes their state, stores a snapshot in SQLite, and checks \texttt{canExecute}. For executable plans, it queries Uniswap Quoter for the expected output amount and computes the slippage-protected threshold
+\begin{equation}
+m_{\min} = q \left(1 - \frac{s}{10000}\right),
+\end{equation}
+where $q$ is the quoted output amount and $s$ is the plan slippage in basis points. It then submits the execution transaction with the protected minimum output and a short deadline, and records either a successful attempt with a transaction hash or a failed attempt with an error message. SQLite is used only for local observability and does not replace on-chain state.
+
+The Telegram bot is implemented as a thin control layer above the same contract. It manages the configured backend wallet, ensures token allowance before budgeted operations, fetches plan metadata, and formats plan summaries and detailed plan cards for the user. The supported commands cover the full MVP flow, including listing plans, inspecting a specific plan, creating plans with guided input, changing parameters, and controlling pause or cancellation states.
+
+This split between on-chain state and off-chain orchestration keeps responsibilities clean. The contract enforces validity and custody of funds, while the executor and bot improve usability and automation without owning business logic that must remain trust-minimized.
+
+\section{Experimental Validation and Deployment}
+The project includes automated tests for both the contract and backend helpers. Contract tests cover successful creation, invalid input rejection, owner-only controls, pause and resume, cancellation and post-cancel withdrawals, top-ups, parameter updates, successful execution, prevention of early execution, completion when the remaining budget becomes insufficient, skipped missed intervals, state preservation on swap revert, and global pause behavior. Backend tests verify slippage computation, status derivation from normalized plan data, and SQLite persistence of snapshots and execution attempts.
+
+Local test execution required running Hardhat with a workspace-local \texttt{HOME} directory because the sandboxed environment did not permit writing to the default macOS Hardhat preferences path. With that adjustment, the test suite remains suitable for reproducible validation of the submitted codebase.
+
+The deployed target network is Ethereum Sepolia. The current deployment metadata in the repository reports the \texttt{DCAPlanManager} contract as deployed on March 25, 2026, with the following saved identifiers:
+
+\begin{quote}
+\scriptsize
+\textbf{Contract address:}\\
+\texttt{0x3BBfFa934e619E7fAcE878dA}\\
+\texttt{Ee8da5664eEC45f5}
+
+\textbf{Deployment transaction:}\\
+\texttt{0x4d30b90e5297eb4002822454}\\
+\texttt{571f85ef8a02f8261d365af8}\\
+\texttt{cc477797bd028662}
+\end{quote}
+
+The same metadata file records the Uniswap router, quoter, demo token addresses, pool fee 500, and maximum slippage 1000 basis points used by the MVP. Source verification on the explorer is still pending according to the saved deployment record.
+
+\section{Limitations and Future Work}
+The current implementation intentionally omits several production-grade features. It is restricted to a single-user demo setup, one user-facing trading pair, single-hop routing, and a backend-controlled executor that pays gas for plan execution. It also relies on quoted minimum output protection only and does not include stronger oracle-based price validation or time-weighted average price checks. Finally, it does not use decentralized scheduling services such as Chainlink Automation.
+
+The most natural next steps are support for multiple users and token pairs, a web interface, executor incentives for third-party callers, richer route selection, stronger risk checks, and explorer verification integrated into the deployment workflow. Even with these omissions, the current version is sufficient to demonstrate the main lifecycle and automation mechanics of interval-based investing on Ethereum.
+
+\section{Conclusion}
+This project demonstrates that a compact DCA workflow can be built with a clear separation between fund custody on-chain and scheduling off-chain. The delivered MVP supports the complete educational scenario: budget deposit, recurring purchase execution through Uniswap V3, plan management from Telegram, local observability through SQLite, automated testing, and Sepolia deployment. As a teaching artifact, it offers a realistic but manageable foundation for further work on decentralized investment automation.
+
+\begin{thebibliography}{99}
+
+\bibitem{ethereum}
+V. Buterin, ``A Next-Generation Smart Contract and Decentralized Application Platform,'' 2014. [Online]. Available: \url{https://ethereum.org/en/whitepaper/}
+
+\bibitem{uniswap}
+Uniswap Labs, ``Uniswap Documentation.'' [Online]. Available: \url{https://docs.uniswap.org/}
+
+\bibitem{openzeppelin}
+OpenZeppelin, ``OpenZeppelin Contracts Documentation.'' [Online]. Available: \url{https://docs.openzeppelin.com/contracts/}
+
+\bibitem{hardhat}
+Nomic Foundation, ``Hardhat Documentation.'' [Online]. Available: \url{https://hardhat.org/docs}
+
+\bibitem{telegram}
+Telegram, ``Bot API.'' [Online]. Available: \url{https://core.telegram.org/bots/api}
+
+\end{thebibliography}
+
+\end{document}

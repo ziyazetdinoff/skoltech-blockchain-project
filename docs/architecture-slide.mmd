@@ -1,0 +1,51 @@
+flowchart LR
+    subgraph UX["User Layer"]
+        U["Demo User"]
+        TG["Telegram Bot UI"]
+    end
+
+    subgraph OFF["Off-chain Services<br/>Node.js + Docker Compose"]
+        BOT["Bot Service<br/>Telegraf + ethers.js"]
+        EX["Executor Service<br/>plan scan + tx execution"]
+        WAL["Backend Wallet<br/>single-user demo signer"]
+        DB[("SQLite<br/>snapshots + execution logs")]
+    end
+
+    subgraph CHAIN["Ethereum Sepolia"]
+        DCA["DCAPlanManager<br/>plans + budget storage"]
+        Q["Uniswap Quoter<br/>price quote"]
+        R["Uniswap V3 Router<br/>exactInputSingle"]
+        REC["Recipient Wallet"]
+    end
+
+    U -->|"create / update / pause / cancel"| TG
+    TG -->|"commands"| BOT
+
+    BOT -->|"plan txs"| WAL
+    WAL -->|"createPlan / updatePlan / topUp / withdraw"| DCA
+
+    BOT <-->|"plan status"| DB
+    EX <-->|"snapshots + attempts"| DB
+
+    EX -->|"scan nextPlanId + canExecute"| DCA
+    EX -->|"quoteExactInputSingle"| Q
+    EX -->|"execution tx"| WAL
+    WAL -->|"executePlan(minAmountOut)"| DCA
+
+    DCA -->|"swap amountIn"| R
+    R -->|"tokenOut to contract"| DCA
+    DCA -->|"transfer purchased asset"| REC
+
+    classDef actor fill:#fff4d8,stroke:#d28a00,stroke-width:1.5px,color:#4a3300;
+    classDef service fill:#eef4ff,stroke:#2962b8,stroke-width:1.5px,color:#0f2b52;
+    classDef data fill:#e7f7ef,stroke:#2f8f60,stroke-width:1.5px,color:#133726;
+    classDef chain fill:#f5edff,stroke:#7a49b8,stroke-width:1.5px,color:#31174f;
+
+    class U,TG actor;
+    class BOT,EX,WAL service;
+    class DB data;
+    class DCA,Q,R,REC chain;
+
+    style UX fill:#fffaf0,stroke:#e6c788,stroke-width:1.5px,color:#4a3300;
+    style OFF fill:#f8fbff,stroke:#b7cff4,stroke-width:1.5px,color:#0f2b52;
+    style CHAIN fill:#fbf8ff,stroke:#d0bdf2,stroke-width:1.5px,color:#31174f;

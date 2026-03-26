@@ -1,0 +1,152 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="120" y1="80" x2="1480" y2="820" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FCFBF6" />
+      <stop offset="1" stop-color="#F4F7FB" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#16324F" flood-opacity="0.08" />
+    </filter>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2F5EA9" />
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2A8A62" />
+    </marker>
+    <marker id="arrowOrange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#C07A00" />
+    </marker>
+    <style>
+      .title { font: 700 34px "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif; fill: #14253D; }
+      .subtitle { font: 500 17px "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif; fill: #49617E; }
+      .group-title { font: 700 20px "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif; fill: #17314E; }
+      .group-note { font: 500 13px "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif; fill: #6A7D95; }
+      .box-title { font: 700 20px "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif; fill: #13263D; }
+      .box-body { font: 500 14px "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif; fill: #4F6178; }
+      .label { font: 600 13px "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif; fill: #244A84; }
+      .label-green { font: 600 13px "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif; fill: #226D4F; }
+      .label-orange { font: 600 13px "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif; fill: #9A6305; }
+      .pill { font: 700 12px "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif; fill: #27496B; letter-spacing: 0.06em; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" rx="28" fill="url(#bg)" />
+
+  <text x="72" y="74" class="title">DCA MVP Architecture</text>
+  <text x="72" y="104" class="subtitle">Single-user demo on Ethereum Sepolia: Telegram interface, off-chain executor, and on-chain swap execution</text>
+
+  <rect x="72" y="136" width="230" height="650" rx="28" fill="#FFF7E3" stroke="#E7C06D" stroke-width="2" />
+  <text x="100" y="176" class="group-title">User Layer</text>
+  <text x="100" y="198" class="group-note">Interaction starts in Telegram</text>
+
+  <rect x="102" y="262" width="170" height="112" rx="24" fill="#FFFFFF" stroke="#E3B85A" stroke-width="2" filter="url(#shadow)" />
+  <text x="187" y="308" text-anchor="middle" class="box-title">Demo User</text>
+  <text x="187" y="334" text-anchor="middle" class="box-body">Creates and manages</text>
+  <text x="187" y="354" text-anchor="middle" class="box-body">a DCA plan</text>
+
+  <rect x="102" y="442" width="170" height="122" rx="24" fill="#FFFFFF" stroke="#E3B85A" stroke-width="2" filter="url(#shadow)" />
+  <text x="187" y="488" text-anchor="middle" class="box-title">Telegram</text>
+  <text x="187" y="514" text-anchor="middle" class="box-body">Chat UI for</text>
+  <text x="187" y="534" text-anchor="middle" class="box-body">commands and status</text>
+
+  <path d="M187 374 L187 442" stroke="#C07A00" stroke-width="3.5" marker-end="url(#arrowOrange)" />
+  <text x="202" y="408" class="label-orange">commands</text>
+
+  <rect x="344" y="92" width="574" height="694" rx="30" fill="#F8FBFF" stroke="#B8D0F3" stroke-width="2" />
+  <text x="374" y="132" class="group-title">Off-chain Services</text>
+  <text x="374" y="154" class="group-note">Node.js services packaged with Docker Compose</text>
+
+  <rect x="390" y="188" width="226" height="138" rx="26" fill="#FFFFFF" stroke="#7FA8E8" stroke-width="2" filter="url(#shadow)" />
+  <text x="503" y="234" text-anchor="middle" class="box-title">Bot Service</text>
+  <text x="503" y="260" text-anchor="middle" class="box-body">Telegraf + ethers.js</text>
+  <text x="503" y="280" text-anchor="middle" class="box-body">create / update / pause</text>
+  <text x="503" y="300" text-anchor="middle" class="box-body">cancel / topUp / withdraw</text>
+
+  <rect x="646" y="188" width="226" height="138" rx="26" fill="#FFFFFF" stroke="#7FA8E8" stroke-width="2" filter="url(#shadow)" />
+  <text x="759" y="234" text-anchor="middle" class="box-title">Executor Service</text>
+  <text x="759" y="260" text-anchor="middle" class="box-body">polls nextPlanId</text>
+  <text x="759" y="280" text-anchor="middle" class="box-body">checks canExecute</text>
+  <text x="759" y="300" text-anchor="middle" class="box-body">sends executePlan tx</text>
+
+  <rect x="458" y="408" width="300" height="110" rx="24" fill="#EEF4FF" stroke="#7FA8E8" stroke-width="2" filter="url(#shadow)" />
+  <text x="608" y="452" text-anchor="middle" class="box-title">Backend Wallet</text>
+  <text x="608" y="478" text-anchor="middle" class="box-body">Configured signer used by</text>
+  <text x="608" y="498" text-anchor="middle" class="box-body">bot and executor</text>
+
+  <rect x="440" y="582" width="336" height="126" rx="28" fill="#F2FBF7" stroke="#78C3A0" stroke-width="2" filter="url(#shadow)" />
+  <ellipse cx="608" cy="604" rx="168" ry="22" fill="#E4F7EF" stroke="#78C3A0" stroke-width="2" />
+  <text x="608" y="612" text-anchor="middle" class="box-title">SQLite</text>
+  <text x="608" y="644" text-anchor="middle" class="box-body">plan snapshots</text>
+  <text x="608" y="666" text-anchor="middle" class="box-body">execution attempts</text>
+  <text x="608" y="688" text-anchor="middle" class="box-body">service logs</text>
+
+  <rect x="980" y="92" width="548" height="694" rx="30" fill="#FBF8FF" stroke="#D6C3F2" stroke-width="2" />
+  <text x="1010" y="132" class="group-title">Ethereum Sepolia</text>
+  <text x="1010" y="154" class="group-note">On-chain state and swap execution</text>
+
+  <rect x="1026" y="188" width="244" height="138" rx="26" fill="#FFFFFF" stroke="#AF88E5" stroke-width="2" filter="url(#shadow)" />
+  <text x="1148" y="234" text-anchor="middle" class="box-title">DCAPlanManager</text>
+  <text x="1148" y="260" text-anchor="middle" class="box-body">stores plans and budget</text>
+  <text x="1148" y="280" text-anchor="middle" class="box-body">validates execution window</text>
+  <text x="1148" y="300" text-anchor="middle" class="box-body">transfers purchased tokenOut</text>
+
+  <rect x="1306" y="188" width="176" height="118" rx="24" fill="#FFFFFF" stroke="#AF88E5" stroke-width="2" filter="url(#shadow)" />
+  <text x="1394" y="232" text-anchor="middle" class="box-title">Quoter</text>
+  <text x="1394" y="258" text-anchor="middle" class="box-body">gets price quote</text>
+  <text x="1394" y="278" text-anchor="middle" class="box-body">for minAmountOut</text>
+
+  <rect x="1306" y="356" width="176" height="118" rx="24" fill="#FFFFFF" stroke="#AF88E5" stroke-width="2" filter="url(#shadow)" />
+  <text x="1394" y="400" text-anchor="middle" class="box-title">Uniswap Router</text>
+  <text x="1394" y="426" text-anchor="middle" class="box-body">exactInputSingle</text>
+  <text x="1394" y="446" text-anchor="middle" class="box-body">USDC -&gt; WETH</text>
+
+  <rect x="1046" y="582" width="208" height="116" rx="24" fill="#FFFFFF" stroke="#AF88E5" stroke-width="2" filter="url(#shadow)" />
+  <text x="1150" y="626" text-anchor="middle" class="box-title">Recipient Wallet</text>
+  <text x="1150" y="652" text-anchor="middle" class="box-body">receives purchased</text>
+  <text x="1150" y="672" text-anchor="middle" class="box-body">tokenOut</text>
+
+  <rect x="1306" y="560" width="176" height="56" rx="18" fill="#F5F0FF" stroke="#C9B0EC" stroke-width="2" />
+  <text x="1394" y="594" text-anchor="middle" class="pill">USDC / WETH POOL</text>
+
+  <path d="M272 503 H328 V257 H390" stroke="#C07A00" stroke-width="3.5" fill="none" marker-end="url(#arrowOrange)" />
+  <text x="282" y="488" class="label-orange">slash commands</text>
+
+  <path d="M503 326 L503 408" stroke="#2F5EA9" stroke-width="3.5" marker-end="url(#arrowBlue)" />
+  <text x="520" y="370" class="label">plan management txs</text>
+
+  <path d="M759 326 L759 392 C759 402 752 408 742 408 L758 408" stroke="#2F5EA9" stroke-width="3.5" fill="none" marker-end="url(#arrowBlue)" />
+  <text x="776" y="370" class="label">execution tx</text>
+
+  <path d="M452 326 V560 H516 V582" stroke="#2A8A62" stroke-width="3.5" fill="none" marker-end="url(#arrowGreen)" />
+  <text x="344" y="440" class="label-green">status snapshots</text>
+
+  <path d="M810 326 V560 H700 V582" stroke="#2A8A62" stroke-width="3.5" fill="none" marker-end="url(#arrowGreen)" />
+  <text x="780" y="440" class="label-green">attempts and logs</text>
+
+  <path d="M608 582 V518" stroke="#2A8A62" stroke-width="3.5" fill="none" marker-end="url(#arrowGreen)" />
+  <text x="626" y="544" class="label-green">shared local state</text>
+
+  <path d="M872 220 H1026" stroke="#2F5EA9" stroke-width="3.5" stroke-dasharray="10 8" fill="none" marker-end="url(#arrowBlue)" />
+  <text x="884" y="206" class="label">scan nextPlanId + canExecute</text>
+
+  <path d="M836 188 V170 H1394 V188" stroke="#2F5EA9" stroke-width="3.5" stroke-dasharray="10 8" fill="none" marker-end="url(#arrowBlue)" />
+  <text x="1072" y="162" class="label">quoteExactInputSingle</text>
+
+  <path d="M758 463 C882 463 942 442 1026 290" stroke="#2F5EA9" stroke-width="4" fill="none" marker-end="url(#arrowBlue)" />
+  <text x="830" y="432" class="label">executePlan(minAmountOut)</text>
+
+  <path d="M1270 257 H1306" stroke="#2F5EA9" stroke-width="3.5" fill="none" marker-end="url(#arrowBlue)" />
+  <text x="1278" y="238" class="label">quote</text>
+
+  <path d="M1270 290 C1310 312 1324 330 1324 356" stroke="#2F5EA9" stroke-width="3.5" fill="none" marker-end="url(#arrowBlue)" />
+  <text x="1286" y="336" class="label">swap via router</text>
+
+  <path d="M1306 474 C1266 510 1238 520 1210 520 C1172 520 1148 482 1148 326" stroke="#2F5EA9" stroke-width="3.5" fill="none" marker-end="url(#arrowBlue)" />
+  <text x="1248" y="506" class="label">tokenOut returns</text>
+
+  <path d="M1148 326 V582" stroke="#2F5EA9" stroke-width="4" fill="none" marker-end="url(#arrowBlue)" />
+  <text x="1164" y="470" class="label">transfer purchased asset</text>
+
+  <rect x="1236" y="58" width="226" height="34" rx="17" fill="#FFF5D6" stroke="#E5C170" stroke-width="1.5" />
+  <text x="1349" y="80" text-anchor="middle" class="pill">MVP: SINGLE USER DEMO</text>
+</svg>

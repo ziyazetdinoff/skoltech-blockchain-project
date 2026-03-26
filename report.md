@@ -1,69 +1,69 @@
 # Report: DCA MVP on Ethereum Sepolia
 
-## 1. Постановка задачи
+## 1. Problem Statement
 
-Цель проекта: реализовать учебный MVP для интервального DCA-инвестирования, где пользователь резервирует бюджет в смарт-контракте, а off-chain executor автоматически исполняет покупки токена по расписанию через Uniswap с защитой по slippage. Пользовательский интерфейс реализован через Telegram-бота.
+The goal of the project is to deliver an educational MVP for interval-based DCA investing, where a user reserves a budget in a smart contract and an off-chain executor automatically performs scheduled token purchases through Uniswap with slippage protection. The user interface is implemented as a Telegram bot.
 
-## 2. Архитектура решения
+## 2. Solution Architecture
 
-Система состоит из трех основных модулей:
+The system consists of three main modules:
 
-- `DCAPlanManager` хранит планы, бюджеты, правила управления и логику on-chain исполнения
-- `Executor Service` периодически сканирует планы, рассчитывает `minAmountOut` и вызывает `executePlan`
-- `Telegram Bot` управляет планами и показывает состояние пользователю
+- `DCAPlanManager` stores plans, budgets, management rules, and on-chain execution logic
+- `Executor Service` periodically scans plans, calculates `minAmountOut`, and calls `executePlan`
+- `Telegram Bot` manages plans and shows their status to the user
 
-Дополнительно используется SQLite для локальных снапшотов планов, истории execution attempts и служебных логов backend-компонентов.
+SQLite is additionally used for local plan snapshots, execution attempt history, and service logs for backend components.
 
-## 3. Логика смарт-контракта
+## 3. Smart Contract Logic
 
-Контракт поддерживает:
+The contract supports:
 
-- создание плана
-- паузу и возобновление
-- отмену
-- пополнение бюджета
-- вывод неиспользованного остатка после отмены
-- обновление параметров плана
-- автоматическое исполнение любым caller при соблюдении условий `canExecute`
+- plan creation
+- pause and resume
+- cancellation
+- budget top-ups
+- withdrawal of unused funds after cancellation
+- plan parameter updates
+- automated execution by any caller when `canExecute` conditions are satisfied
 
-План хранит:
+Each plan stores:
 
-- владельца и получателя
-- `tokenIn` и `tokenOut`
+- the owner and recipient
+- `tokenIn` and `tokenOut`
 - `amountPerInterval`
-- `totalBudget` и `remainingBudget`
+- `totalBudget` and `remainingBudget`
 - `intervalSeconds`
 - `slippageBps`
 - `startTime`
 - `nextExecutionTime`
-- логические флаги `active`, `paused`, `canceled`
+- boolean flags `active`, `paused`, `canceled`
 
-Исполнение реализовано через Uniswap V3 `exactInputSingle`. После успешного swap контракт:
+Execution is implemented through Uniswap V3 `exactInputSingle`. After a successful swap, the contract:
 
-- уменьшает `remainingBudget`
-- сдвигает `nextExecutionTime` на `block.timestamp + intervalSeconds`
-- переводит купленный `tokenOut` получателю
+- decreases `remainingBudget`
+- moves `nextExecutionTime` to `block.timestamp + intervalSeconds`
+- transfers the purchased `tokenOut` to the recipient
 
-Это поведение не догоняет пропущенные интервалы, что соответствует ТЗ MVP.
+This behavior does not catch up missed intervals, which matches the MVP specification.
 
-## 4. Логика automation
+## 4. Automation Logic
 
-Executor:
+The executor:
 
-- читает `nextPlanId`
-- проходит по всем планам
-- синхронизирует снапшоты в SQLite
-- проверяет `canExecute`
-- берет котировку через Uniswap Quoter
-- рассчитывает `minAmountOut` по `slippageBps`
-- отправляет `executePlan`
-- логирует успехи и ошибки
+- reads `nextPlanId`
+- iterates over all plans
+- synchronizes snapshots into SQLite
+- checks `canExecute`
+- requests a quote from Uniswap Quoter
+- calculates `minAmountOut` using `slippageBps`
+- submits `executePlan`
+- logs successes and failures
 
-При revert swap состояние плана on-chain не меняется, а executor просто фиксирует ошибку и может попробовать снова в следующем цикле.
+If the swap reverts, the on-chain plan state remains unchanged, and the executor simply records the error and can retry in the next cycle.
 
-## 5. Telegram-интерфейс
+## 5. Telegram Interface
 
-Бот поддерживает команды:
+The bot supports the following commands:
 
 - `/plans`, `/plan <id>`
 - `/pause <id>`, `/resume <id>`, `/cancel <id>`
@@ -72,56 +72,56 @@ Executor:
 - `/create`
 - `/update <id>`
 
-Для `/create` и `/update` реализован пошаговый ввод, чтобы уменьшить количество ошибок в ручном вводе параметров.
+For `/create` and `/update`, guided step-by-step input is implemented to reduce manual input errors.
 
-## 6. Тесты
+## 6. Tests
 
-Реализованы unit tests для контракта и backend-утилит.
+Unit tests are implemented for the contract and backend utilities.
 
-Покрытые сценарии контракта:
+Covered contract scenarios:
 
-- успешное создание
-- отклонение некорректного создания
-- owner-only операции
-- пауза и возобновление
-- отмена и вывод остатка
-- пополнение и обновление параметров
-- успешное исполнение
-- запрет раннего исполнения
-- завершение плана при недостатке остатка
-- корректная обработка пропущенных интервалов
-- откат состояния при revert swap
+- successful creation
+- rejection of invalid creation
+- owner-only operations
+- pause and resume
+- cancellation and remaining-funds withdrawal
+- top-up and parameter updates
+- successful execution
+- prevention of early execution
+- plan completion when the remaining budget is insufficient
+- correct handling of missed intervals
+- state rollback on swap revert
 - global pause
 
-Покрытые backend-сценарии:
+Covered backend scenarios:
 
-- расчет `minAmountOut`
-- вычисление статуса плана
-- запись снапшотов и execution attempts в SQLite
+- `minAmountOut` calculation
+- plan status derivation
+- persistence of snapshots and execution attempts in SQLite
 
-## 7. Адреса деплоя
+## 7. Deployment Addresses
 
-На момент подготовки этого отчета автоматический деплой в Sepolia из среды отчета не выполнялся, потому что не были предоставлены рабочие секреты и RPC-конфигурация.
+At the time of preparing this report, automatic Sepolia deployment was not performed from the report environment because working secrets and RPC configuration were not provided there.
 
-После деплоя заполнить:
+After deployment, fill in:
 
 - `DCAPlanManager (Sepolia): TBD`
 - `Deployment metadata file: deployments/sepolia.json`
 
-## 8. Ограничения MVP
+## 8. MVP Limitations
 
 - single-user demo
-- одна демонстрационная пара `USDC -> WETH`
-- только Uniswap V3 single-hop
-- без production-grade управления секретами
-- без Chainlink Automation
-- без multi-user SaaS-логики
-- без oracle/TWAP-проверок сверх `minAmountOut`
+- one demo pair `USDC -> WETH`
+- Uniswap V3 single-hop only
+- no production-grade secret management
+- no Chainlink Automation
+- no multi-user SaaS logic
+- no oracle or TWAP checks beyond `minAmountOut`
 
-## 9. Возможные улучшения
+## 9. Possible Improvements
 
 - Chainlink Automation
-- поддержка нескольких пар и нескольких пользователей
+- support for multiple pairs and multiple users
 - web UI
-- reward-механизм для внешних исполнителей
-- более строгие risk checks и oracle-based validation
+- reward mechanism for external executors
+- stricter risk checks and oracle-based validation

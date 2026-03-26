@@ -1,18 +1,13 @@
 # DCA MVP for Ethereum Sepolia
 
-Учебный MVP для стратегии Dollar-Cost Averaging на Ethereum Sepolia. Проект состоит из смарт-контракта `DCAPlanManager`, off-chain executor-сервиса и Telegram-бота для одного демонстрационного пользователя.
-
-Дополнительные документы:
-
-- [README_ENG.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/README_ENG.md)
-- [ENV_SETUP.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/ENV_SETUP.md)
+We built this project as a three-person team to deliver an educational MVP for Dollar-Cost Averaging on Ethereum Sepolia. Our goal was to combine an on-chain DCA manager, an off-chain automation service, and a simple Telegram interface into one end-to-end demo system.
 
 <!-- DEPLOYMENT_INFO:START -->
 ## Deployment Info
 
-- Сеть: sepolia
-- Контракт: `DCAPlanManager`
-- Адрес: `0x3BBfFa934e619E7fAcE878dAEe8da5664eEC45f5`
+- Network: sepolia
+- Contract: `DCAPlanManager`
+- Address: `0x3BBfFa934e619E7fAcE878dAEe8da5664eEC45f5`
 - Explorer: [address](https://sepolia.etherscan.io/address/0x3BBfFa934e619E7fAcE878dAEe8da5664eEC45f5)
 - Code: [verified/source](https://sepolia.etherscan.io/address/0x3BBfFa934e619E7fAcE878dAEe8da5664eEC45f5#code)
 - Deploy tx: `0x4d30b90e5297eb4002822454571f85ef8a02f8261d365af8cc477797bd028662`
@@ -22,17 +17,17 @@
 - Verified at: not verified yet
 <!-- DEPLOYMENT_INFO:END -->
 
-## Что реализовано
+## What Our Team Implemented
 
-- смарт-контракт `DCAPlanManager` на Solidity
-- исполнение swap через Uniswap V3 `exactInputSingle`
-- защита по slippage через `minAmountOut`
-- off-chain executor c котировкой через Quoter и логированием в SQLite
-- Telegram-бот с командами управления планами
-- unit tests для контракта и backend-утилит
-- deploy и seed scripts
+- a Solidity smart contract: `DCAPlanManager`
+- Uniswap V3 single-hop swap execution through `exactInputSingle`
+- slippage protection via `minAmountOut`
+- an off-chain executor that scans plans, requests quotes, executes due plans, and stores logs in SQLite
+- a Telegram bot for plan management
+- deployment and seeding scripts
+- unit tests for the contract and backend utilities
 
-## Структура проекта
+## Project Structure
 
 ```text
 contracts/
@@ -71,29 +66,61 @@ Dockerfile
 docker-compose.yml
 Makefile
 README.md
+README_ENG.md
+ENV_SETUP.md
 report.md
 ```
 
-## Требования к окружению
+## Tech Stack
 
-- Node.js 22 LTS рекомендуется
+As a team, we chose a simple and practical MVP stack:
+
+- Solidity for the smart contract
+- Hardhat + TypeScript for development, testing, and deployment
+- Node.js for the executor and Telegram bot
+- SQLite for local backend state and execution logs
+- Uniswap V3 for swap execution
+- Telegram Bot API through `telegraf`
+
+## MVP Scope
+
+In our implementation, a user can:
+
+- create a DCA plan
+- pause and resume it
+- cancel it
+- top up the budget
+- withdraw unused funds after cancellation
+- update amount, interval, and slippage
+- let the executor automatically execute due swaps
+
+This MVP is intentionally limited to:
+
+- one demo user
+- one demo trading pair at the UX level: `USDC -> WETH`
+- Uniswap V3 single-hop execution
+- Sepolia testnet only
+
+## Environment Requirements
+
+- Node.js 22 LTS is recommended
 - npm 10+
-- Sepolia RPC URL
-- тестовые токены USDC и WETH в Sepolia
-- Uniswap router и quoter адреса для Sepolia
-- Telegram bot token
+- a Sepolia RPC endpoint
+- Sepolia ETH for gas
+- Sepolia USDC for plan funding
+- a Telegram bot token
 
-Hardhat в этой среде успешно собрался и протестировался, но под Node.js 23 показывает предупреждение о неподдерживаемой версии. Для обычного запуска лучше использовать Node.js 22.
+Hardhat compiled and tested successfully in our environment, but Node.js 23 shows a warning because Hardhat officially prefers supported LTS versions. For normal use, we recommend Node.js 22.
 
-## Переменные окружения
+## Environment Variables
 
-Скопируйте `.env.example` в `.env` и заполните значения:
+Copy `.env.example` into `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-Обязательные поля:
+Required values:
 
 - `RPC_URL`
 - `DEPLOYER_PRIVATE_KEY`
@@ -105,20 +132,19 @@ cp .env.example .env
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_ALLOWED_USER_ID`
 
-Для verify дополнительно потребуется:
+For verification, we also need:
 
 - `ETHERSCAN_API_KEY`
 
-Подробная пошаговая инструкция, откуда брать ключевые значения (`RPC_URL`, private key, Uniswap addresses, USDC/WETH addresses), вынесена в отдельный документ:
-
-- [ENV_SETUP.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/ENV_SETUP.md)
-
-После деплоя заполните один из адресов контракта:
+After deployment, also set:
 
 - `DCA_MANAGER_ADDRESS`
+
+or:
+
 - `CONTRACT_ADDRESS`
 
-Опциональные поля с дефолтами:
+Default optional values:
 
 - `UNISWAP_POOL_FEE=500`
 - `MAX_SLIPPAGE_BPS=1000`
@@ -127,15 +153,19 @@ cp .env.example .env
 - `SQLITE_PATH=./data/dca.sqlite`
 - `NETWORK_NAME=sepolia`
 
-## Установка
+For a beginner-friendly explanation of where these values come from, see:
+
+- [ENV_SETUP.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/ENV_SETUP.md)
+
+## Installation
 
 ```bash
 npm install
 ```
 
-## Docker и Makefile
+## Docker and Makefile
 
-Теперь рекомендуемый способ запуска проекта:
+We now treat Docker as the primary way to run the project:
 
 ```bash
 make build-image
@@ -143,7 +173,7 @@ make compile
 make test
 ```
 
-Основные цели:
+Main targets:
 
 - `make build-image`
 - `make compile`
@@ -155,7 +185,7 @@ make test
 - `make down`
 - `make logs`
 
-Эквивалентные прямые команды через Docker Compose:
+Equivalent Docker Compose commands:
 
 ```bash
 docker compose build
@@ -166,7 +196,7 @@ docker compose run --rm hardhat npm run verify:sepolia
 docker compose up -d bot executor
 ```
 
-## Сборка и тесты
+## Build and Test
 
 ```bash
 npm run build
@@ -174,7 +204,7 @@ npm run compile
 npm test
 ```
 
-Если среда ограничивает домашнюю директорию Hardhat, можно временно использовать локальный `HOME`:
+If Hardhat cannot use the default home directory in your environment, run it with a local `HOME`:
 
 ```bash
 mkdir -p .home
@@ -182,106 +212,113 @@ HOME=$PWD/.home npm run compile
 HOME=$PWD/.home npm test
 ```
 
-## Деплой в Sepolia
+## Deploy to Sepolia
 
-1. Заполните `.env`, включая `RPC_URL`, `DEPLOYER_PRIVATE_KEY`, `UNISWAP_ROUTER`, `UNISWAP_QUOTER`, `USDC_ADDRESS`, `WETH_ADDRESS`.
-2. Выполните:
+From our team workflow perspective, deployment is done in four steps:
+
+1. Fill in `.env` with RPC, private key, router, quoter, and token addresses.
+2. Run:
 
 ```bash
 npm run deploy:sepolia
 ```
 
-3. Скрипт:
-   - задеплоит `DCAPlanManager`
-   - сохранит метаданные в `deployments/sepolia.json`
-   - выведет адрес контракта в терминал
-   - автоматически обновит deployment block в `README.md` и `README_ENG.md`
-4. Скопируйте адрес в `.env` как `DCA_MANAGER_ADDRESS` или `CONTRACT_ADDRESS`.
+3. Read the deployed contract address from terminal output.
+4. Save that address into `.env` as `DCA_MANAGER_ADDRESS` or `CONTRACT_ADDRESS`.
 
-Рекомендуемая команда:
+The script also stores deployment metadata in:
+
+- `deployments/sepolia.json`
+
+It also auto-updates the deployment info block in:
+
+- `README.md`
+- `README_ENG.md`
+
+Recommended command:
 
 ```bash
 make deploy
 ```
 
-## Verify в Etherscan
+## Verify on Etherscan
 
-Verify вынесен в отдельный шаг и использует:
+Verification is intentionally separated from deployment. The verify step uses:
 
-- `ETHERSCAN_API_KEY` из `.env`
-- адрес и constructor args из `deployments/sepolia.json`
+- `ETHERSCAN_API_KEY` from `.env`
+- the deployed address and constructor arguments from `deployments/sepolia.json`
 
-Команда:
+Run:
 
 ```bash
 make verify
 ```
 
-Или напрямую:
+Or directly:
 
 ```bash
 docker compose run --rm hardhat npm run verify:sepolia
 ```
 
-После успешного verify:
+After successful verification:
 
-- `deployments/sepolia.json` обновляется флагами `verified` и `verifiedAt`
-- deployment block в `README.md` и `README_ENG.md` обновляется повторно
+- `deployments/sepolia.json` is updated with `verified` and `verifiedAt`
+- both README deployment info blocks are refreshed
 
-## Создание демо-плана
+## Create a Demo Plan
 
-Скрипт `seed.ts` создает план для демо-пары `USDC -> WETH`.
+We added `seed.ts` so our team could quickly demonstrate the full flow without typing every transaction manually.
 
-Формат:
+Usage:
 
 ```bash
 npm run seed:sepolia -- <amountPerInterval> <totalBudget> <intervalSeconds> <slippageBps> [recipient] [startTime]
 ```
 
-Пример:
+Example:
 
 ```bash
 npm run seed:sepolia -- 10 100 604800 300 me now
 ```
 
-Где:
+Arguments:
 
-- `amountPerInterval`: сумма одной покупки в USDC
-- `totalBudget`: общий бюджет в USDC
-- `intervalSeconds`: интервал в секундах
-- `slippageBps`: допустимый slippage в bps
-- `recipient`: адрес получателя или `me`
-- `startTime`: `now`, unix timestamp или ISO datetime
+- `amountPerInterval`: amount spent on each purchase in USDC
+- `totalBudget`: total reserved budget in USDC
+- `intervalSeconds`: execution interval in seconds
+- `slippageBps`: allowed slippage in basis points
+- `recipient`: recipient address or `me`
+- `startTime`: `now`, Unix timestamp, or ISO datetime
 
-## Запуск executor
+## Run the Executor
 
 ```bash
 npm run executor
 ```
 
-Executor:
+The executor:
 
-- проходит по всем `planId` от `0` до `nextPlanId - 1`
-- обновляет локальные снапшоты в SQLite
-- проверяет `canExecute`
-- получает quote через Uniswap Quoter
-- считает `minAmountOut`
-- вызывает `executePlan`
-- пишет историю попыток и служебные логи в SQLite
+- scans all `planId` values from `0` to `nextPlanId - 1`
+- syncs plan snapshots into SQLite
+- checks `canExecute`
+- requests a quote from Uniswap Quoter
+- calculates `minAmountOut`
+- calls `executePlan`
+- stores execution attempts and logs
 
-Для разового прогона:
+For a single one-off run:
 
 ```bash
 node --import tsx executor/index.ts --once
 ```
 
-## Запуск Telegram-бота
+## Run the Telegram Bot
 
 ```bash
 npm run bot
 ```
 
-Поддерживаемые команды:
+Supported commands:
 
 - `/start`
 - `/help`
@@ -295,16 +332,16 @@ npm run bot
 - `/create`
 - `/update <id>`
 
-Для `/plan <id>` бот теперь показывает inline buttons:
+For `/plan <id>`, the bot now shows inline buttons:
 
 - `Pause`
 - `Resume`
 - `Cancel`
 - `Refresh`
 
-Slash-команды продолжают работать как раньше.
+The original slash commands remain fully supported.
 
-`/create` проводит пользователя через шаги:
+Interactive `/create` flow:
 
 1. `amountPerInterval`
 2. `totalBudget`
@@ -313,29 +350,50 @@ Slash-команды продолжают работать как раньше.
 5. `recipient`
 6. `startTime`
 
-`/update` проводит через:
+Interactive `/update` flow:
 
 1. `amountPerInterval`
 2. `intervalSeconds`
 3. `slippageBps`
 
-Доступ к боту ограничен `TELEGRAM_ALLOWED_USER_ID`.
+The bot is restricted to one allowed Telegram user through `TELEGRAM_ALLOWED_USER_ID`.
 
-## Минимальный demo-flow
+## Demo Flow
 
-1. Установить зависимости и заполнить `.env`.
-2. Задеплоить контракт: `npm run deploy:sepolia`.
-3. Записать адрес контракта в `.env`.
-4. Создать демо-план через `npm run seed:sepolia -- 10 100 604800 300 me now` или через `/create`.
-5. Запустить executor: `npm run executor`.
-6. Запустить бот: `npm run bot`.
-7. Проверить список планов через `/plans` и детали через `/plan <id>`.
+This is the shortest end-to-end flow our team used for verification:
 
-## Ограничения MVP
+1. Install dependencies.
+2. Fill `.env`.
+3. Deploy the contract with `npm run deploy:sepolia`.
+4. Save the deployed contract address in `.env`.
+5. Create a demo plan with `npm run seed:sepolia -- 10 100 604800 300 me now` or through `/create`.
+6. Start the executor with `npm run executor`.
+7. Start the bot with `npm run bot`.
+8. Verify plans through `/plans` and `/plan <id>`.
 
-- single-user demo
-- одна демо-пара `USDC -> WETH` на уровне конфигурации и UX
-- только Uniswap V3 single-hop
-- приватные ключи хранятся в `.env`
-- `withdrawUnusedFunds` доступен только после `cancelPlan`
-- адреса Sepolia и токенов нужно заполнить вручную из вашей среды
+## Acceptance Summary
+
+From our team’s implementation perspective, the delivered MVP includes:
+
+- contract plan lifecycle management
+- automated execution attempts
+- Uniswap-based swaps with slippage protection
+- SQLite-backed service state
+- Telegram-based user interaction
+- tests and deployment tooling
+- project documentation in English
+
+## Known Limitations
+
+- single-user demo architecture
+- one demo pair in UX and configuration
+- no production-grade secret management
+- no Chainlink Automation
+- no advanced routing across multiple pools or DEXes
+- no oracle or TWAP validation beyond `minAmountOut`
+
+## Additional Documents
+
+- [README.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/README.md)
+- [ENV_SETUP.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/ENV_SETUP.md)
+- [report.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/report.md)
