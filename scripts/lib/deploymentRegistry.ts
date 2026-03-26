@@ -83,37 +83,6 @@ export async function writeDeploymentRecord(networkName: string, record: Deploym
   await fs.writeFile(filePath, `${JSON.stringify(record, null, 2)}\n`, "utf-8");
 }
 
-function renderDeploymentBlockRu(record: DeploymentRecord): string {
-  if (!record.address) {
-    return [
-      DEPLOYMENT_INFO_START,
-      "## Deployment Info",
-      "",
-      "- Сеть: Sepolia",
-      "- Контракт: `DCAPlanManager`",
-      "- Статус: контракт еще не задеплоен из этого репозитория",
-      DEPLOYMENT_INFO_END,
-    ].join("\n");
-  }
-
-  return [
-    DEPLOYMENT_INFO_START,
-    "## Deployment Info",
-    "",
-    `- Сеть: ${record.network}`,
-    `- Контракт: \`${record.contract}\``,
-    `- Адрес: \`${record.address}\``,
-    `- Explorer: [address](${record.explorerAddressUrl})`,
-    `- Code: [verified/source](${record.explorerCodeUrl})`,
-    `- Deploy tx: \`${record.deploymentTxHash}\``,
-    `- Deployer: \`${record.deployer}\``,
-    `- Deployed at: ${record.deployedAt}`,
-    `- Verified: ${record.verified ? "yes" : "no"}`,
-    `- Verified at: ${record.verifiedAt ?? "not verified yet"}`,
-    DEPLOYMENT_INFO_END,
-  ].join("\n");
-}
-
 function renderDeploymentBlockEn(record: DeploymentRecord): string {
   if (!record.address) {
     return [
@@ -159,10 +128,6 @@ export async function updateDeploymentDocs(record: DeploymentRecord): Promise<vo
   const docs = [
     {
       filePath: path.join(process.cwd(), "README.md"),
-      renderer: renderDeploymentBlockRu,
-    },
-    {
-      filePath: path.join(process.cwd(), "README_ENG.md"),
       renderer: renderDeploymentBlockEn,
     },
   ];

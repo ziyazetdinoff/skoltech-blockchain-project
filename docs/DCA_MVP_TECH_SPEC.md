@@ -487,8 +487,11 @@ config/
   networks.ts
 
 artifacts/ or deployments/
+docs/
+  ENV_SETUP.md
+  DCA_MVP_TECH_SPEC.md
+  report/
 README.md
-report.md
 ```
 
 ---
@@ -592,7 +595,7 @@ The project is considered complete if:
 - deploy to Sepolia
 - record contract addresses
 - prepare `README.md`
-- prepare `report.md`
+- prepare the report artifacts in `docs/report/`
 
 ---
 

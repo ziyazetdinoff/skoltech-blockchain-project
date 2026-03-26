@@ -62,13 +62,18 @@ src/
 
 deployments/
   sepolia.json
+
+docs/
+  README.md
+  ENV_SETUP.md
+  DCA_MVP_TECH_SPEC.md
+  architecture/
+  report/
+
 Dockerfile
 docker-compose.yml
 Makefile
 README.md
-README_ENG.md
-ENV_SETUP.md
-report.md
 ```
 
 ## Tech Stack
@@ -155,7 +160,7 @@ Default optional values:
 
 For a beginner-friendly explanation of where these values come from, see:
 
-- [ENV_SETUP.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/ENV_SETUP.md)
+- [docs/ENV_SETUP.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/docs/ENV_SETUP.md)
 
 ## Installation
 
@@ -233,7 +238,6 @@ The script also stores deployment metadata in:
 It also auto-updates the deployment info block in:
 
 - `README.md`
-- `README_ENG.md`
 
 Recommended command:
 
@@ -263,7 +267,7 @@ docker compose run --rm hardhat npm run verify:sepolia
 After successful verification:
 
 - `deployments/sepolia.json` is updated with `verified` and `verifiedAt`
-- both README deployment info blocks are refreshed
+- the `README.md` deployment info block is refreshed
 
 ## Create a Demo Plan
 
@@ -395,5 +399,7 @@ From our team’s implementation perspective, the delivered MVP includes:
 ## Additional Documents
 
 - [README.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/README.md)
-- [ENV_SETUP.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/ENV_SETUP.md)
-- [report.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/report.md)
+- [docs/README.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/docs/README.md)
+- [docs/ENV_SETUP.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/docs/ENV_SETUP.md)
+- [docs/DCA_MVP_TECH_SPEC.md](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/docs/DCA_MVP_TECH_SPEC.md)
+- [docs/report/report.pdf](/Users/ruslan/cur-anime-dir/skoltech-blockchain-project/docs/report/report.pdf)

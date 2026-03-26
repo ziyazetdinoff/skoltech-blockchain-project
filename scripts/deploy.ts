@@ -37,7 +37,7 @@ async function main(): Promise<void> {
 
   console.log(`DCAPlanManager deployed to ${contractAddress}`);
   console.log(`Deployment metadata written to deployments/${networkName}.json`);
-  console.log("README.md and README_ENG.md were updated with the current deployment info.");
+  console.log("README.md was updated with the current deployment info.");
 }
 
 void main();
